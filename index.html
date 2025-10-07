@@ -365,6 +365,84 @@
             <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; color: #1565c0;">
                 ℹ️ Helps plan watering schedule - Robot reduces watering before rain
             </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 13px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">
+                    📍 Select Your City:
+                </label>
+                <select id="citySelector" onchange="changeCity()" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;">
+                    <optgroup label="Punjab">
+                        <option value="30.9010,75.8573">Ludhiana</option>
+                        <option value="31.6340,74.8723" selected>Amritsar</option>
+                        <option value="30.3398,76.3869">Mohali</option>
+                        <option value="31.3260,75.5762">Jalandhar</option>
+                        <option value="30.2046,74.4586">Bathinda</option>
+                        <option value="31.0794,77.1734">Pathankot</option>
+                        <option value="30.7046,76.7179">Patiala</option>
+                    </optgroup>
+                    <optgroup label="Haryana & Chandigarh">
+                        <option value="30.7333,76.7794">Chandigarh</option>
+                        <option value="30.6942,76.8606">Panchkula</option>
+                        <option value="28.4595,77.0266">Gurgaon</option>
+                        <option value="29.1492,75.7217">Hisar</option>
+                        <option value="28.9845,77.0266">Faridabad</option>
+                        <option value="30.1575,77.2840">Ambala</option>
+                        <option value="29.3803,76.9694">Rohtak</option>
+                        <option value="28.9931,76.8672">Panipat</option>
+                    </optgroup>
+                    <optgroup label="Himachal Pradesh">
+                        <option value="31.1048,77.1734">Shimla</option>
+                        <option value="32.2190,76.3234">Dharamshala</option>
+                        <option value="31.6912,76.5328">Solan</option>
+                        <option value="31.8050,76.5286">Kasauli</option>
+                    </optgroup>
+                    <optgroup label="Jammu & Kashmir">
+                        <option value="32.7266,74.8570">Jammu</option>
+                        <option value="34.0837,74.7973">Srinagar</option>
+                    </optgroup>
+                    <optgroup label="Rajasthan">
+                        <option value="26.9124,75.7873">Jaipur</option>
+                        <option value="25.2138,75.8648">Kota</option>
+                        <option value="26.4499,74.6399">Jodhpur</option>
+                        <option value="24.5854,73.7125">Udaipur</option>
+                    </optgroup>
+                    <optgroup label="Uttar Pradesh">
+                        <option value="28.6139,77.2090">Delhi/NCR</option>
+                        <option value="28.6692,77.4538">Noida</option>
+                        <option value="28.6304,77.3768">Ghaziabad</option>
+                        <option value="26.8467,80.9462">Lucknow</option>
+                        <option value="25.4358,81.8463">Allahabad</option>
+                        <option value="25.3176,82.9739">Varanasi</option>
+                        <option value="27.1767,78.0081">Agra</option>
+                    </optgroup>
+                    <optgroup label="West India">
+                        <option value="23.0225,72.5714">Ahmedabad</option>
+                        <option value="19.0760,72.8777">Mumbai</option>
+                        <option value="18.5204,73.8567">Pune</option>
+                        <option value="15.2993,74.1240">Goa</option>
+                        <option value="21.1458,79.0882">Nagpur</option>
+                    </optgroup>
+                    <optgroup label="South India">
+                        <option value="12.9716,77.5946">Bangalore</option>
+                        <option value="13.0827,80.2707">Chennai</option>
+                        <option value="17.3850,78.4867">Hyderabad</option>
+                        <option value="11.0168,76.9558">Coimbatore</option>
+                        <option value="8.5241,76.9366">Trivandrum</option>
+                        <option value="9.9312,76.2673">Kochi</option>
+                        <option value="12.2958,76.6394">Mysore</option>
+                    </optgroup>
+                    <optgroup label="East India">
+                        <option value="22.5726,88.3639">Kolkata</option>
+                        <option value="25.5941,85.1376">Patna</option>
+                        <option value="26.8467,80.9462">Bhubaneswar</option>
+                    </optgroup>
+                    <optgroup label="Central India">
+                        <option value="23.2599,77.4126">Bhopal</option>
+                        <option value="22.7196,75.8577">Indore</option>
+                    </optgroup>
+                </select>
+            </div>
+            
             <div id="weatherForecast" style="text-align: center; padding: 10px; color: #666;">
                 Loading weather data...
             </div>
@@ -390,6 +468,7 @@
         let isConnected = false;
         let updateInterval;
         let weatherInterval;
+        let currentCity = { lat: 31.6340, lon: 74.8723, name: 'Amritsar, Punjab' };
 
         function addLog(message) {
             const log = document.getElementById('activityLog');
@@ -511,9 +590,24 @@
             fetchWeather(); // Fetch immediately
         }
 
+        function changeCity() {
+            const selector = document.getElementById('citySelector');
+            const coords = selector.value.split(',');
+            const cityName = selector.options[selector.selectedIndex].text;
+            
+            currentCity = {
+                lat: parseFloat(coords[0]),
+                lon: parseFloat(coords[1]),
+                name: cityName
+            };
+            
+            addLog(`📍 Changed location to ${cityName}`);
+            fetchWeather();
+        }
+
         async function fetchWeather() {
-            const lat = 31.6340; // Amritsar latitude
-            const lon = 74.8723; // Amritsar longitude
+            const lat = currentCity.lat;
+            const lon = currentCity.lon;
             
             document.getElementById('weatherForecast').innerHTML = 
                 '<span style="color: #666;">🔄 Loading weather...</span>';
@@ -530,7 +624,7 @@
                     displayWeather(data);
                     addLog('🌤️ Weather forecast updated');
                     document.getElementById('weatherForecast').innerHTML = 
-                        '<span style="color: #388e3c; font-weight: 600;">✅ Live forecast for Amritsar</span>';
+                        `<span style="color: #388e3c; font-weight: 600;">✅ Live forecast for ${currentCity.name}</span>`;
                     return;
                 }
             } catch (error) {
@@ -557,7 +651,7 @@
             // Method 3: Show sample/demo data
             displaySampleWeather();
             document.getElementById('weatherForecast').innerHTML = 
-                '<span style="color: #ff9800;">⚠️ Demo weather - Real data loads when online</span>';
+                `<span style="color: #ff9800;">⚠️ Demo weather for ${currentCity.name}</span>`;
             addLog('⚠️ Showing sample weather data');
         }
         
